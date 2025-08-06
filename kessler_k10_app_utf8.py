@@ -1,11 +1,12 @@
 import streamlit as st
-from fpdf import FPDF  # now using fpdf2
+from fpdf import FPDF  # fpdf2
 import smtplib
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email import encoders
 import io
+import os
 
 # -------------------------
 # Kessler K10 Questions
@@ -40,7 +41,7 @@ bands = [
 ]
 
 # -------------------------
-# PDF Generation
+# PDF Generation with Unicode font preloaded
 # -------------------------
 class PDF(FPDF):
     def __init__(self):
@@ -58,18 +59,17 @@ class PDF(FPDF):
         self.set_font("DejaVu", "", 8)
         self.cell(0, 10, "Life Minus Work | Page " + str(self.page_no()), 0, 0, "C")
 
-
 def generate_pdf(name, score, category, guidance):
     pdf = PDF()
     pdf.add_page()
-    pdf.set_font("Helvetica", size=12)
+    pdf.set_font("DejaVu", "", 12)
     if name:
         pdf.cell(0, 10, f"Name: {name}", ln=True)
     pdf.cell(0, 10, f"Kessler K10 Score: {score}", ln=True)
     pdf.cell(0, 10, f"Distress Category: {category}", ln=True)
     pdf.multi_cell(0, 10, f"Guidance: {guidance}")
     pdf_output = io.BytesIO()
-    pdf_bytes = pdf.output(dest="S").encode("utf-8")  # UTF-8 encoding
+    pdf_bytes = pdf.output(dest="S").encode("latin1", "replace")
     pdf_output.write(pdf_bytes)
     pdf_output.seek(0)
     return pdf_output
@@ -129,7 +129,6 @@ if st.session_state.page < len(questions):
             st.session_state.responses.append(opt_value)
             st.session_state.page += 1
 else:
-    # Name and email input
     st.session_state.name = st.text_input("Your Name (optional)", st.session_state.name)
     st.session_state.email = st.text_input("Your Email (optional, to receive results)")
 
@@ -144,10 +143,8 @@ else:
         st.success(f"Your Kessler K10 Score: {score} — {category}")
         st.write(guidance)
 
-        # Generate PDF
         pdf_buffer = generate_pdf(st.session_state.name, score, category, guidance)
 
-        # Download button
         st.download_button(
             label="📥 Download Your Results (PDF)",
             data=pdf_buffer,
@@ -155,7 +152,6 @@ else:
             mime="application/pdf"
         )
 
-        # Email option
         if st.session_state.email:
             try:
                 pdf_buffer.seek(0)
