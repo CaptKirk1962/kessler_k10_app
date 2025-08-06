@@ -43,15 +43,21 @@ bands = [
 # PDF Generation
 # -------------------------
 class PDF(FPDF):
+    def __init__(self):
+        super().__init__()
+        font_path = os.path.join(os.path.dirname(__file__), "DejaVuSans.ttf")
+        self.add_font("DejaVu", "", font_path, uni=True)
+
     def header(self):
-        self.set_font("Helvetica", "B", 16)
-        self.cell(0, 10, "Life Minus Work – Kessler K10 Results", ln=True, align="C")
+        self.set_font("DejaVu", "", 16)
+        self.cell(0, 10, "Life Minus Work - Kessler K10 Results", ln=True, align="C")
         self.ln(10)
 
     def footer(self):
         self.set_y(-15)
-        self.set_font("Helvetica", "I", 8)
+        self.set_font("DejaVu", "", 8)
         self.cell(0, 10, "Life Minus Work | Page " + str(self.page_no()), 0, 0, "C")
+
 
 def generate_pdf(name, score, category, guidance):
     pdf = PDF()
