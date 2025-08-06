@@ -57,10 +57,9 @@ class PDF(FPDF):
 def generate_pdf(name, score, category, guidance):
     pdf = PDF()
     font_path = os.path.join(os.path.dirname(__file__), "DejaVuSans.ttf")
-    pdf.add_font("DejaVu", "", font_path, uni=True)
-
+    pdf.add_font("DejaVu", "", font_path, uni=True)  # Always load font
     pdf.add_page()
-    pdf.set_font("DejaVu", "", 12)
+    pdf.set_font("DejaVu", "", 12)  # Always use DejaVu font
     if name:
         pdf.cell(0, 10, f"Name: {name}", ln=True)
     pdf.cell(0, 10, f"Kessler K10 Score: {score}", ln=True)
